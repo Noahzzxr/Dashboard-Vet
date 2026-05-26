@@ -77,10 +77,6 @@ const validate = () => {
     errors.value.nome = 'Nome é obrigatório.'
     isValid = false
   }
-  if (!formData.value.cpf.trim() || formData.value.cpf.length < 14) {
-    errors.value.cpf = 'CPF inválido.'
-    isValid = false
-  }
   if (!formData.value.telefone.trim() || formData.value.telefone.length < 14) {
     errors.value.telefone = 'Telefone inválido.'
     isValid = false
@@ -123,7 +119,7 @@ const submitForm = () => {
 
       <div class="form-row">
         <div class="form-group col-6">
-          <label for="cpf">CPF <span class="required">*</span></label>
+          <label for="cpf">CPF</label>
           <input 
             type="text" 
             id="cpf" 

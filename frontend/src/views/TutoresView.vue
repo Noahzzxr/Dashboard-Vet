@@ -37,7 +37,7 @@ const filteredTutores = computed(() => {
   const query = searchFilter.value.toLowerCase().trim()
   return tutores.value.filter(t => 
     t.nome.toLowerCase().includes(query) || 
-    t.cpf.includes(query)
+    (t.cpf || '').includes(query)
   )
 })
 
@@ -152,7 +152,7 @@ const handleDelete = async (id) => {
                   <strong>{{ tutor.nome }}</strong>
                 </div>
               </td>
-              <td>{{ tutor.cpf }}</td>
+              <td>{{ tutor.cpf || 'Não informado' }}</td>
               <td>{{ tutor.telefone }}</td>
               <td>{{ tutor.email }}</td>
               <td class="address-cell" :title="tutor.endereco">{{ tutor.endereco }}</td>

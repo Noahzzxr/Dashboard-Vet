@@ -414,10 +414,23 @@ const getHojeExtenso = () => {
   
   .app-topbar {
     padding-left: 4.5rem;
+    gap: 0.75rem;
   }
 
   .app-view-container {
     padding: 1.5rem 1rem;
+  }
+
+  .topbar-right {
+    gap: 0.75rem;
+  }
+
+  .current-route-title {
+    display: block;
+    max-width: 46vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -428,6 +441,7 @@ const getHojeExtenso = () => {
   
   .app-topbar {
     height: 58px;
+    padding-right: 0.75rem;
   }
   
   .mobile-toggle {
@@ -437,6 +451,30 @@ const getHojeExtenso = () => {
 
   .app-view-container {
     padding: 1.25rem 0.75rem;
+  }
+
+  .current-route-title {
+    max-width: 52vw;
+    font-size: 1rem;
+  }
+
+  .clinic-status {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .clinic-status span:last-child {
+    display: none;
+  }
+
+  .clinic-status {
+    width: 32px;
+    height: 32px;
+    justify-content: center;
+    padding: 0;
+    border-radius: 50%;
   }
 }
 </style>

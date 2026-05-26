@@ -47,7 +47,7 @@ const filteredPets = computed(() => {
   const query = searchFilter.value.toLowerCase().trim()
   return pets.value.filter(p => {
     const petNameMatches = p.nome.toLowerCase().includes(query)
-    const tutorName = tutoresMap.value[p.tutorId]?.nome || ''
+    const tutorName = p.nome_tutor || tutoresMap.value[p.tutorId]?.nome || ''
     const tutorNameMatches = tutorName.toLowerCase().includes(query)
     return petNameMatches || tutorNameMatches
   })
@@ -99,7 +99,7 @@ const handleDelete = async (id) => {
 
 // Retorna o emoticon apropriado baseado na espécie do paciente
 const getEspecieIcon = (especie) => {
-  const esp = especie.toLowerCase()
+  const esp = (especie || '').toLowerCase()
   if (esp.includes('cão') || esp.includes('cachorro') || esp.includes('dog')) return '🐶'
   if (esp.includes('gato') || esp.includes('cat')) return '🐱'
   if (esp.includes('ave') || esp.includes('pássaro') || esp.includes('bird') || esp.includes('calopsita')) return '🐦'
@@ -170,24 +170,24 @@ const getEspecieIcon = (especie) => {
 
         <div class="pet-card-body">
           <div class="info-row">
-            <span class="info-label">Tutor Responsável:</span>
-            <span class="info-value text-bold">
-              👤 {{ tutoresMap[pet.tutorId]?.nome || 'Tutor não encontrado' }}
-            </span>
-          </div>
+              <span class="info-label">Tutor Responsável:</span>
+              <span class="info-value text-bold">
+                👤 {{ pet.nome_tutor || tutoresMap[pet.tutorId]?.nome || 'Tutor não encontrado' }}
+              </span>
+            </div>
 
           <div class="info-row-grid">
             <div class="info-column">
               <span class="info-label">Idade:</span>
               <span class="info-value">
-                {{ pet.idadeAnos }} {{ pet.idadeAnos === 1 ? 'ano' : 'anos' }}
+                {{ pet.idade ?? pet.idadeAnos }} {{ Number(pet.idade ?? pet.idadeAnos) === 1 ? 'ano' : 'anos' }}
                 <span v-if="pet.idadeMeses > 0"> e {{ pet.idadeMeses }} {{ pet.idadeMeses === 1 ? 'mês' : 'meses' }}</span>
               </span>
             </div>
 
             <div class="info-column">
-              <span class="info-label">Peso:</span>
-              <span class="info-value">{{ pet.peso.toFixed(2) }} kg</span>
+              <span class="info-label">Sexo:</span>
+              <span class="info-value">{{ pet.sexo }}</span>
             </div>
           </div>
 
@@ -256,6 +256,7 @@ const getEspecieIcon = (especie) => {
 .search-input-wrapper {
   position: relative;
   flex: 1;
+  min-width: 240px;
   max-width: 450px;
 }
 
@@ -293,7 +294,7 @@ const getEspecieIcon = (especie) => {
 /* Grid de Cartões de Pets */
 .pets-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
 }
 
@@ -327,6 +328,7 @@ const getEspecieIcon = (especie) => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  min-width: 0;
 }
 
 .pet-avatar-icon {
@@ -344,12 +346,14 @@ const getEspecieIcon = (especie) => {
   font-size: 1.15rem;
   font-weight: 700;
   color: hsl(215, 60%, 16%);
+  overflow-wrap: anywhere;
 }
 
 .pet-specie-badge {
   font-size: 0.8rem;
   color: hsl(215, 20%, 48%);
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .pet-actions {
@@ -420,6 +424,7 @@ const getEspecieIcon = (especie) => {
 .info-value {
   font-size: 0.9rem;
   color: hsl(215, 45%, 22%);
+  overflow-wrap: anywhere;
 }
 
 .text-bold {
@@ -466,7 +471,7 @@ const getEspecieIcon = (especie) => {
 .modal-content {
   background: white;
   border-radius: 14px;
-  width: 100%;
+  width: min(580px, calc(100vw - 2rem));
   max-width: 580px;
   position: relative;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
@@ -580,5 +585,101 @@ const getEspecieIcon = (especie) => {
   font-size: 0.95rem;
   max-width: 380px;
   margin-bottom: 1.5rem;
+}
+
+@media (max-width: 760px) {
+  .pets-view {
+    gap: 1rem;
+  }
+
+  .view-header {
+    align-items: stretch;
+  }
+
+  .view-header > div {
+    width: 100%;
+  }
+
+  .view-title {
+    font-size: 1.45rem;
+    line-height: 1.2;
+  }
+
+  .view-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .view-header .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filter-bar {
+    align-items: stretch;
+    padding: 0.85rem;
+  }
+
+  .search-input-wrapper {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .results-count {
+    width: 100%;
+    text-align: center;
+  }
+
+  .pets-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .pet-card {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .pet-card-header {
+    gap: 0.75rem;
+  }
+
+  .pet-avatar-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.8rem;
+  }
+
+  .info-row-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-overlay {
+    align-items: flex-start;
+    padding: 0.75rem;
+    overflow-y: auto;
+  }
+
+  .modal-content {
+    width: 100%;
+    max-height: calc(100vh - 1.5rem);
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .pet-card-header {
+    flex-direction: column;
+  }
+
+  .pet-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .card-action-btn {
+    width: 34px;
+    height: 34px;
+  }
 }
 </style>

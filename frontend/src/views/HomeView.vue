@@ -161,7 +161,7 @@ const formatarData = (dataStr) => {
                 <td>{{ petsMap[consulta.petId]?.especie || 'N/A' }}</td>
                 <td>
                   <!-- Busca tutor do pet -->
-                  {{ petsMap[consulta.petId]?.tutorId ? 'Tutor #' + petsMap[consulta.petId]?.tutorId : 'N/A' }}
+                  {{ petsMap[consulta.petId]?.nome_tutor || (petsMap[consulta.petId]?.tutorId ? 'Tutor #' + petsMap[consulta.petId]?.tutorId : 'N/A') }}
                 </td>
                 <td>
                   <span class="vet-badge">

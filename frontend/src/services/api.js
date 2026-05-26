@@ -55,21 +55,127 @@ async function request(endpoint, method = 'GET', data = null) {
   };
   
   if (data && (method === 'POST' || method === 'PUT')) {
-    options.body = JSON.stringify(data);
+    options.body = JSON.stringify(toBackendPayload(endpoint, data));
   }
 
   try {
     const response = await fetch(url, options);
+    const responseData = await response.json().catch(() => null);
+
     if (!response.ok) {
-      throw new Error(`Erro na requisição: ${response.statusText}`);
+      const error = new Error(responseData?.erro || `Erro na requisição: ${response.statusText}`);
+      error.status = response.status;
+      error.response = responseData;
+      throw error;
     }
-    return await response.json();
+
+    return normalizeResponse(endpoint, responseData);
   } catch (error) {
+    if (error.status) {
+      console.error(`[API Error] Backend respondeu erro em ${url}:`, error.response || error.message);
+      throw error;
+    }
+
     console.warn(`[API Info] Falha na comunicação com o backend (${url}). Usando fallback offline do LocalStorage.`, error.message);
     
     // Fallback Inteligente usando LocalStorage
     return handleLocalRequest(endpoint, method, data);
   }
+}
+
+function getResource(endpoint) {
+  return endpoint.split('/').filter(Boolean)[0];
+}
+
+function formatDateOnly(value) {
+  if (!value) return '';
+  if (typeof value === 'string') return value.split('T')[0];
+  return new Date(value).toISOString().split('T')[0];
+}
+
+function formatTimeOnly(value) {
+  if (!value) return '';
+  return String(value).slice(0, 5);
+}
+
+function normalizeItem(resource, item) {
+  if (!item || typeof item !== 'object') return item;
+
+  if (resource === 'tutores') {
+    return {
+      ...item,
+      cpf: item.cpf || ''
+    };
+  }
+
+  if (resource === 'pets') {
+    const idade = Number(item.idade || 0);
+    return {
+      ...item,
+      tutorId: item.tutorId ?? item.tutor_id,
+      idadeAnos: item.idadeAnos ?? idade,
+      idadeMeses: item.idadeMeses ?? 0,
+      nome_tutor: item.nome_tutor || item.nomeTutor || '',
+      sexo: item.sexo || 'Macho'
+    };
+  }
+
+  if (resource === 'consultas') {
+    return {
+      ...item,
+      petId: item.petId ?? item.pet_id,
+      veterinarioId: item.veterinarioId ?? item.veterinario_id,
+      data: item.data ?? formatDateOnly(item.data_consulta),
+      hora: item.hora ?? formatTimeOnly(item.hora_consulta),
+      sintomas: item.sintomas ?? item.motivo ?? '',
+      diagnostico: item.diagnostico || '',
+      status: item.status || 'Agendada'
+    };
+  }
+
+  return item;
+}
+
+function normalizeResponse(endpoint, responseData) {
+  const resource = getResource(endpoint);
+  if (Array.isArray(responseData)) {
+    return responseData.map(item => normalizeItem(resource, item));
+  }
+  return normalizeItem(resource, responseData);
+}
+
+function toBackendPayload(endpoint, data) {
+  const resource = getResource(endpoint);
+
+  if (resource === 'tutores') {
+    const { nome, email, telefone, endereco } = data;
+    return { nome, email, telefone, endereco };
+  }
+
+  if (resource === 'pets') {
+    return {
+      nome: data.nome,
+      especie: data.especie,
+      raca: data.raca,
+      idade: Number(data.idade ?? data.idadeAnos ?? 0),
+      sexo: data.sexo,
+      tutor_id: Number(data.tutor_id ?? data.tutorId)
+    };
+  }
+
+  if (resource === 'consultas') {
+    return {
+      pet_id: Number(data.pet_id ?? data.petId),
+      veterinario_id: Number(data.veterinario_id ?? data.veterinarioId),
+      data_consulta: data.data_consulta ?? data.data,
+      hora_consulta: data.hora_consulta ?? data.hora,
+      motivo: data.motivo ?? data.sintomas,
+      diagnostico: data.diagnostico || '',
+      status: data.status || 'Agendada'
+    };
+  }
+
+  return data;
 }
 
 // Roteamento interno do mock LocalStorage

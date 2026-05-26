@@ -20,8 +20,8 @@ const formData = ref({
   raca: '',
   idadeAnos: 0,
   idadeMeses: 0,
+  sexo: 'Macho',
   tutorId: '',
-  peso: '',
   observacoes: ''
 })
 
@@ -37,8 +37,8 @@ const syncForm = () => {
       raca: '',
       idadeAnos: 0,
       idadeMeses: 0,
+      sexo: 'Macho',
       tutorId: '',
-      peso: '',
       observacoes: ''
     }
   }
@@ -72,8 +72,8 @@ const validate = () => {
     errors.value.tutorId = 'Selecione o tutor responsável.'
     isValid = false
   }
-  if (formData.value.peso === '' || isNaN(formData.value.peso) || Number(formData.value.peso) <= 0) {
-    errors.value.peso = 'Insira um peso válido em kg.'
+  if (!formData.value.sexo) {
+    errors.value.sexo = 'Selecione o sexo.'
     isValid = false
   }
 
@@ -87,8 +87,7 @@ const submitForm = () => {
       ...formData.value,
       tutorId: Number(formData.value.tutorId),
       idadeAnos: Number(formData.value.idadeAnos),
-      idadeMeses: Number(formData.value.idadeMeses),
-      peso: Number(formData.value.peso)
+      idadeMeses: Number(formData.value.idadeMeses)
     }
     emit('save', submittedData)
   }
@@ -146,16 +145,16 @@ const submitForm = () => {
         </div>
 
         <div class="form-group col-6">
-          <label for="peso">Peso (kg) <span class="required">*</span></label>
-          <input 
-            type="number" 
-            step="0.01" 
-            id="peso" 
-            v-model="formData.peso" 
-            placeholder="Ex: 12.5"
-            :class="{ 'has-error': errors.peso }"
-          />
-          <span v-if="errors.peso" class="error-msg">{{ errors.peso }}</span>
+          <label for="sexo">Sexo <span class="required">*</span></label>
+          <select 
+            id="sexo" 
+            v-model="formData.sexo"
+            :class="{ 'has-error': errors.sexo }"
+          >
+            <option value="Macho">Macho</option>
+            <option value="Fêmea">Fêmea</option>
+          </select>
+          <span v-if="errors.sexo" class="error-msg">{{ errors.sexo }}</span>
         </div>
       </div>
 
@@ -184,7 +183,7 @@ const submitForm = () => {
           >
             <option value="" disabled>Selecione um Tutor...</option>
             <option v-for="tutor in tutores" :key="tutor.id" :value="tutor.id">
-              {{ tutor.nome }} ({{ tutor.cpf }})
+              {{ tutor.nome }}{{ tutor.cpf ? ` (${tutor.cpf})` : '' }}
             </option>
           </select>
           <span v-if="errors.tutorId" class="error-msg">{{ errors.tutorId }}</span>
@@ -243,6 +242,7 @@ const submitForm = () => {
 .form-row {
   display: flex;
   gap: 1rem;
+  align-items: flex-start;
 }
 
 .col-8 { flex: 2; }
@@ -260,6 +260,8 @@ label {
 }
 
 input, select, textarea {
+  width: 100%;
+  min-height: 44px;
   padding: 0.7rem 0.9rem;
   border: 1.5px solid hsl(210, 16%, 85%);
   border-radius: 8px;
@@ -282,24 +284,39 @@ input.has-error, select.has-error {
 }
 
 .age-inputs {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(130px, 1fr));
   gap: 0.75rem;
 }
 
 .age-field {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(84px, 1fr) auto;
   align-items: center;
-  gap: 0.3rem;
-  flex: 1;
+  gap: 0.55rem;
+  min-width: 0;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid hsl(210, 16%, 88%);
+  border-radius: 8px;
+  background-color: hsl(210, 20%, 99%);
 }
 
 .age-field input {
   width: 100%;
+  min-width: 0;
+  height: 42px;
+  padding: 0.45rem 0.6rem;
+  text-align: center;
+  font-weight: 700;
+  background-color: white;
 }
 
 .age-field span {
-  font-size: 0.8rem;
+  min-width: 44px;
+  font-size: 0.82rem;
   color: hsl(215, 20%, 45%);
+  font-weight: 650;
+  white-space: nowrap;
 }
 
 .error-msg {
@@ -361,5 +378,57 @@ input.has-error, select.has-error {
   background-color: hsl(170, 65%, 48%);
   transform: translateY(-1px);
   box-shadow: 0 4px 6px rgba(44, 201, 172, 0.2);
+}
+
+@media (max-width: 680px) {
+  .form-container {
+    padding: 1.15rem;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .col-8,
+  .col-4,
+  .col-6 {
+    width: 100%;
+    flex: none;
+  }
+
+  .age-inputs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .age-field {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+    align-items: stretch;
+  }
+
+  .age-field input {
+    height: 46px;
+    font-size: 1rem;
+  }
+
+  .age-field span {
+    text-align: center;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .age-inputs {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
